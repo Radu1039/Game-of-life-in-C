@@ -2,6 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+void verifis(const FILE *f)   ///functie pentru verificarea deschiderii fiserului
+{
+    if(f==NULL)
+    {
+        puts("Fisierul nu s a deschis");
+        exit(1);
+    }
+}
+
 int neighbours(const char mat[][101], int i, int j, int linii, int coloane)  ///functie pentru numararea vecinilor ai fiecarui element din matrice
 {
     int nrX=0;
@@ -25,7 +34,9 @@ int main(int argc, const char* argv[])
         FILE *input_file = fopen(argv[t], "r");
         FILE *output_file = fopen(argv[t+1], "w");
 
-      
+        verifis(input_file);
+        verifis(output_file);
+        
         char GoF[101][101];
         int T,N,M,K;
 
