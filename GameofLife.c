@@ -36,13 +36,15 @@ int main(int argc, const char* argv[])
 
         verifis(input_file);
         verifis(output_file);
-        
+
         char GoF[101][101];
         int T,N,M,K;
 
-        if(t<=5)  ///task 1
+        fscanf(input_file,"%d",&T);     ///citire numar task
+
+        if(t<=5 && T==1)  ///task 1
         {
-            fscanf(input_file, "%d %d %d %d", &T, &N, &M, &K);  
+            fscanf(input_file, "%d %d %d", &N, &M, &K);  
 
             for(int i=0;i<N;i++)                                    ///citire data*.in unde * numar de la 1 la 5
                 for(int j=0;j<M;j++)                            
