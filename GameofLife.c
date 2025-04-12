@@ -4,8 +4,8 @@ int main(int argc, const char* argv[])
 {
     for(int t = 1; t < argc; t+=2)
     {
-        FILE *input_file = fopen(argv[t], "r");
-        FILE *output_file = fopen(argv[t+1], "w");
+        FILE* input_file = fopen(argv[t], "r");
+        FILE* output_file = fopen(argv[t+1], "w");
 
         verifis(input_file);
         verifis(output_file);
@@ -25,7 +25,16 @@ int main(int argc, const char* argv[])
         if(T==1)  ///task 1
             task1(N,M,K,GoF,output_file);
         else if(T==2)  ///task 2
+        {
             task2(N,M,K,GoF,output_file, &stiva);
+            printf("\n");
+            puts("Vrei sa vezi taskul bonus? (d/n)");
+            char bonus='d';
+            scanf(" %c",&bonus);
+            if(bonus=='d')
+                task2bonus(&stiva, GoF, N,M,K);
+            deleteStack(&stiva);
+        }
         fclose(input_file);
         fclose(output_file);
     }

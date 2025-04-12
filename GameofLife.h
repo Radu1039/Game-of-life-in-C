@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <limits.h>
 struct ElemLista {
     int l, c;            // info about the node
     struct ElemLista* next;  // adress of the next node
@@ -26,3 +26,5 @@ void push(nodstack** top, nodlista* list);
 void deleteStack(nodstack** top);
 void deleteList (nodlista **head);
 void task2(int n, int m, int k, char matrice[][101], FILE* output, nodstack** top);
+nodlista* pop(nodstack** top);
+void task2bonus(nodstack** top, char matrice[][101], int n, int m, int k);

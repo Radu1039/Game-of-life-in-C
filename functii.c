@@ -145,7 +145,7 @@ void deleteList (nodlista **head ) {
 void task2(int n, int m, int k, char matrice[][101], FILE* output, nodstack** top)
 {
     *top=NULL;
-    for(int h=1;h<=k;h++)
+    for(int gen=1;gen<=k;gen++)
     {
         nodlista* head=NULL;
         char newGoF[101][101];
@@ -181,11 +181,52 @@ void task2(int n, int m, int k, char matrice[][101], FILE* output, nodstack** to
             for(int j=0;j<m;j++)
                 matrice[i][j]=newGoF[i][j];
 
-        fprintf(output, "%d", h);
+        fprintf(output, "%d", gen);
         printLista(head, output);
 
         push(top, head);
-
     }
-    deleteStack(top);
+}
+
+nodlista* pop(nodstack** top) {
+    // returnează INT_MIN dacă stiva este goală
+    if ((*top) == NULL) 
+        return NULL;
+
+    // stochează adresa vârfului în temp
+    nodstack *temp = (*top);
+
+    // stochează valoarea din vârf în aux
+    nodlista* aux = temp->lista;
+
+    // șterge elementul din vârf
+    *top = (*top)->next;
+    free(temp);
+
+    return aux;
+}
+
+void task2bonus(nodstack** top, char matrice[][101], int n, int m, int k)
+{
+    while(k>0)
+    {
+        nodlista* listagen=pop(top);
+        
+        nodlista *iter=listagen;             // daca lista nu e vida, se parcurge:
+            while (iter != NULL  ) {   // daca nu e sfarsitul listei:
+                if(matrice[iter->l][iter->c]=='X')
+                    matrice[iter->l][iter->c]='+';
+                else if(matrice[iter->l][iter->c]=='+')
+                    matrice[iter->l][iter->c]='X';
+                iter = iter->next;         // se trece la nodul urmator:
+	        }
+        deleteList(&listagen);
+        k--;
+    }
+
+    for(int i=0;i<n;i++) {
+        for(int j=0;j<m;j++)
+            printf("%c ",matrice[i][j]);
+        printf("\n");
+    }
 }
