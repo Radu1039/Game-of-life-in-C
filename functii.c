@@ -89,26 +89,23 @@ void addAtBeginning(nodlista** head, int linie, int coloana) {
 
 void addAtEnd(nodlista** head, int linie, int coloana) {
     
-    // daca lista este vida, se modifica adresa de inceput
     if (*head == NULL) 
         addAtBeginning(&*head, linie, coloana);
     else {
         nodlista *aux = *head;
-        nodlista *newNode = (nodlista*)malloc(sizeof(nodlista));
-        newNode->l = linie; // se stocheaza informatia nodului nou
+        nodlista *newNode = (nodlista*)malloc(sizeof(nodlista));   ///am schimbat aici fctia fata de cum era 
+        newNode->l = linie;                                         ///deoarece rameneau aux si newnode initializate dar nefolosite
         newNode->c = coloana;
-        // cat timp nu s-a ajuns la final, se parcurge
         while (aux->next != NULL) 
             aux = aux->next;
-        // se adauga noul element in lista
         aux->next = newNode;
-        newNode->next = NULL; // final lista
+        newNode->next = NULL;                                                            
     }
 }
 
-void printLista(nodlista *head, FILE* output) { // lista nu se modifica
+void printLista(nodlista *head, FILE* output) { 
     while (head != NULL) {
-        fprintf(output, " %d %d", head->l, head->c);
+        fprintf(output, " %d %d", head->l, head->c);   ///modificata pentru a afisa linia si coloana
         head = head->next;
     }
     fprintf(output,"\n");
@@ -123,10 +120,10 @@ void push(nodstack** top, nodlista* list) {
 
 void deleteStack(nodstack** top) {
     nodstack* temp;
-    while ((*top) != NULL) {  // echivalent cu !isEmpty(*top)
+    while ((*top) != NULL) {  
         temp = *top;
-        *top = (*top)->next;
-        deleteList(&temp->lista);
+        *top = (*top)->next;            
+        deleteList(&temp->lista);       ///modificata pentru a sterge si lista informatie a nodului de stiva
         free(temp);
     }
 }
@@ -142,13 +139,13 @@ void deleteList (nodlista **head ) {
     *head = NULL ;
 }
 
-void task2(int n, int m, int k, char matrice[][101], FILE* output, nodstack** top)
+void task2(int n, int m, int k, char matrice[][101], FILE* output, nodstack** top)       ///aceeasi procedura ca la task 1 dar ...
 {
-    *top=NULL;
+    *top=NULL;                      ///stiva
     for(int gen=1;gen<=k;gen++)
     {
-        nodlista* head=NULL;
-        char newGoF[101][101];
+        nodlista* head=NULL;        ///lista pentru fiecare generatie
+        char newGoF[101][101];        
         for(int i=0;i<n;i++)
         {
             for(int j=0;j<m;j++)
@@ -159,8 +156,8 @@ void task2(int n, int m, int k, char matrice[][101], FILE* output, nodstack** to
                 {
                     if(vecini<2 || vecini>3)
                     {
-                        newGoF[i][j]='+';
-                        addAtEnd(&head, i, j);
+                        newGoF[i][j]='+';           ///aici construim si matricea si adaugam in lista coordonatele i si j
+                        addAtEnd(&head, i, j);      
                     }
                     else
                         newGoF[i][j]='X';
@@ -177,56 +174,50 @@ void task2(int n, int m, int k, char matrice[][101], FILE* output, nodstack** to
                 }
             }
         }
-        for(int i=0;i<n;i++)  ///copiem matricea temporara in matricea noastra
+        for(int i=0;i<n;i++)  
             for(int j=0;j<m;j++)
                 matrice[i][j]=newGoF[i][j];
 
-        fprintf(output, "%d", gen);
-        printLista(head, output);
+        fprintf(output, "%d", gen);         ///afisam numarul generatiei
+        printLista(head, output);           ///si lista
 
-        push(top, head);
+        push(top, head);                ///stocam lista in stiva
     }
 }
 
-nodlista* pop(nodstack** top) {
-    // returnează INT_MIN dacă stiva este goală
+nodlista* pop(nodstack** top) {         ///modificata pentru a returna o lista
+    
     if ((*top) == NULL) 
         return NULL;
-
-    // stochează adresa vârfului în temp
     nodstack *temp = (*top);
-
-    // stochează valoarea din vârf în aux
     nodlista* aux = temp->lista;
-
-    // șterge elementul din vârf
     *top = (*top)->next;
     free(temp);
 
     return aux;
 }
 
-void task2bonus(nodstack** top, char matrice[][101], int n, int m, int k)
+void task2bonus(nodstack** top, char matrice[][101], int n, int m, int k, FILE* output)
 {
     while(k>0)
     {
-        nodlista* listagen=pop(top);
+        nodlista* listagen=pop(top);        ///aici punem lista fiecarei generatie
         
-        nodlista *iter=listagen;             // daca lista nu e vida, se parcurge:
-            while (iter != NULL  ) {   // daca nu e sfarsitul listei:
-                if(matrice[iter->l][iter->c]=='X')
-                    matrice[iter->l][iter->c]='+';
+        nodlista *iter=listagen;               ///o parcurgem
+            while (iter != NULL  ) {   
+                if(matrice[iter->l][iter->c]=='X')      ///fiecare element al listei gasit corespunde unui element al matricei care
+                    matrice[iter->l][iter->c]='+';              ///va fi schimbat
                 else if(matrice[iter->l][iter->c]=='+')
                     matrice[iter->l][iter->c]='X';
-                iter = iter->next;         // se trece la nodul urmator:
+                iter = iter->next;         
 	        }
-        deleteList(&listagen);
+        deleteList(&listagen);                  ///stergem lista pentru a scapa de memmory leaks
         k--;
     }
 
     for(int i=0;i<n;i++) {
-        for(int j=0;j<m;j++)
-            printf("%c ",matrice[i][j]);
-        printf("\n");
+        for(int j=0;j<m;j++)                    ///afisam in fisier
+            fprintf(output,"%c",matrice[i][j]);
+        fprintf(output,"\n");
     }
 }

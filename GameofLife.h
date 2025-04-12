@@ -3,14 +3,14 @@
 #include <string.h>
 #include <limits.h>
 struct ElemLista {
-    int l, c;            // info about the node
-    struct ElemLista* next;  // adress of the next node
+    int l, c;            ///nod lista care contine linia si coloana
+    struct ElemLista* next;  
 };
 
 typedef struct ElemLista nodlista;
 
 struct ElemStack {
-    nodlista* lista;
+    nodlista* lista;  ///nod stiva care contine o lista
     struct ElemStack* next;
 };
 
@@ -27,4 +27,4 @@ void deleteStack(nodstack** top);
 void deleteList (nodlista **head);
 void task2(int n, int m, int k, char matrice[][101], FILE* output, nodstack** top);
 nodlista* pop(nodstack** top);
-void task2bonus(nodstack** top, char matrice[][101], int n, int m, int k);
+void task2bonus(nodstack** top, char matrice[][101], int n, int m, int k, FILE* output);
