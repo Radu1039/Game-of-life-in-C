@@ -3,6 +3,11 @@
 int main(int argc, const char* argv[])
 {
     int nrfisierbonus=1;   ///numar pentru numele fiserelor pentru task2 bonus
+    char bonus='n';
+    printf("\n");
+    puts("Vrei sa vezi taskul bonus? (d/n)");  ///task 2 bonus
+    scanf(" %c",&bonus);
+
     for(int t = 1; t < argc; t+=2)
     {
         FILE* input_file = fopen(argv[t], "r");
@@ -14,8 +19,6 @@ int main(int argc, const char* argv[])
         char GoF[101][101];
         int T,N,M,K;
         
-        nodstack* stiva=NULL;
-
         fscanf(input_file,"%d",&T);     ///citire numar task
 
         fscanf(input_file, "%d %d %d", &N, &M, &K);  
@@ -28,11 +31,11 @@ int main(int argc, const char* argv[])
             task1(N,M,K,GoF,output_file);
         if(T==2)  ///task 2
         {
+            nodstack* stiva=NULL;
             task2(N,M,K,GoF,output_file, &stiva);
-            printf("\n");
-            puts("Vrei sa vezi taskul bonus? (d/n)");  ///task 2 bonus
-            char bonus='d';
-            scanf(" %c",&bonus);
+            
+            
+            
             if(bonus=='d')
             {
                 char fisier[]="OutputData/task2bonus_.out";     
@@ -41,9 +44,21 @@ int main(int argc, const char* argv[])
                 verifis(output_task2bonus);
                 task2bonus(&stiva, GoF, N,M,K,output_task2bonus);
                 fclose(output_task2bonus);
+                nrfisierbonus++;
             }
-            nrfisierbonus++;
-            deleteStack(&stiva);
+            
+            deleteStack(&stiva); ///eliberare memorie
+        }
+        if(T==3) ///task3
+        {
+            nodarbore *copac=NULL;
+            char matriceInit[DIMMAX][DIMMAX];  ///matrice numai cu '+'
+            for(int i=0;i<N;i++)
+                for(int j=0;j<M;j++)
+                    matriceInit[i][j]='+';
+            task3(&copac,N,M,K, GoF);
+            preorder(copac,N ,M,output_file ,matriceInit);  ///afisare
+            freeArbore(&copac);   ///eliberare memorie
         }
         fclose(input_file);
         fclose(output_file);
