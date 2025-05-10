@@ -31,10 +31,10 @@ int main(int argc, const char* argv[])
             task1(N,M,K,GoF,output_file);
         if(T==2)  ///task 2
         {
+            int gen=1;
             nodstack* stiva=NULL;
-            task2(N,M,K,GoF,output_file, &stiva);
-            
-            
+            task2(N,M,K,GoF, &stiva);
+            printStivaDeJosInSus(stiva,output_file,&gen);     ///afisam stiva de jos in sus
             
             if(bonus=='d')
             {

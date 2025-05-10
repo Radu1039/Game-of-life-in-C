@@ -139,18 +139,27 @@ void deleteList (nodlista **head ) {
     *head = NULL ;
 }
 
-void task2(int n, int m, int k, char matrice[][DIMMAX], FILE* output, nodstack** top)       ///aceeasi procedura ca la task 1 dar ...
+void task2(int n, int m, int k, char matrice[][DIMMAX], nodstack** top)       ///aceeasi procedura ca la task 1 dar ...
 {
     *top=NULL;                      ///stiva
     for(int gen=1;gen<=k;gen++)
     {
         nodlista* head=NULL;        ///lista pentru fiecare generatie
         standard(&head,n,m,matrice);
-        fprintf(output, "%d", gen);         ///afisam numarul generatiei
-        printLista(head, output);           ///si lista
-
+        
         push(top, head);                ///stocam lista in stiva
     }
+}
+
+void printStivaDeJosInSus(nodstack* top, FILE *output, int *gen)
+{
+    if(top==NULL) return;
+
+    printStivaDeJosInSus(top->next,output,gen);     ///apelam recursiv ca sa inceapa afisarea de jos
+
+    fprintf(output,"%d",*gen);              ///afisam nr generatiei
+    (*gen)++;                               
+    printLista(top->lista,output);          ///si lista
 }
 
 nodlista* pop(nodstack** top) {         ///modificata pentru a returna o lista
@@ -200,7 +209,7 @@ void regulaB(nodlista **head, int n, int m,char matrice[][DIMMAX])
                 int vecini = neighbours(matrice, i,j,n,m);
                 if(matrice[i][j]=='+')
                 {
-                    if(vecini==2)
+                    if(vecini==2)           ///doar o singura regula acum
                     {
                         newGoF[i][j]='X';
                         addAtEnd(head,i,j);
@@ -261,13 +270,13 @@ nodarbore* copacinit(int n, int m,const char matrice[][DIMMAX])   ///functia ast
     nodarbore *root=(nodarbore*)malloc(sizeof(nodarbore));
     root->left=root->right=NULL;
     nodlista *head=NULL;
-    for(int i=0;i<n;i++)
+    for(int i=0;i<n;i++)            ///construim prima lista cu celule vii
         for(int j=0;j<m;j++)
         {   
             if(matrice[i][j]=='X')
                 addAtEnd(&head,i,j);
         }   
-    root->lista=head;
+    root->lista=head;       ///si o punem in radacina
     return root;
 
 }
