@@ -403,7 +403,6 @@ void preorder(nodarbore *root,int n, int m,FILE *output, char matriceCurenta[][D
 void freeArbore(nodarbore **root)       ///functie pentru eliberarea arborelui
 {
     if(*root==NULL) return;
-
     freeArbore(&(*root)->left);
     freeArbore(&(*root)->right);
 
