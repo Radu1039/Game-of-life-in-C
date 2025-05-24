@@ -33,7 +33,7 @@ int main(int argc, const char* argv[])
         {
             int gen=1;
             nodstack* stiva=NULL;
-            task2(N,M,K,GoF, &stiva);
+            task2(N,M,K,GoF, &stiva,bonus);
             printStivaDeJosInSus(stiva,output_file,&gen);     ///afisam stiva de jos in sus
             
             if(bonus=='d')
@@ -56,7 +56,7 @@ int main(int argc, const char* argv[])
             for(int i=0;i<N;i++)
                 for(int j=0;j<M;j++)
                     matriceInit[i][j]='+';
-            task3(&copac,N,M,K, GoF);
+            task3(&copac,N,M,K, GoF,NULL);
             preorder(copac,N ,M,output_file ,matriceInit);  ///afisare
             freeArbore(&copac);   ///eliberare memorie
         }

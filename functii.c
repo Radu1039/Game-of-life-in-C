@@ -16,11 +16,41 @@ int neighbours(const char mat[][DIMMAX], int i, int j, int linii, int coloane)  
                 jvertical[]={-1, 0, 1, -1, 1, -1, 0, 1};  ///offseturi
     for (int k=0;k<8;k++)
     {
-        int matx=i+iorizontal[k];
-        int maty=j+jvertical[k];
-        if(matx>=0 && matx<linii && maty>=0 && maty<coloane)
-            if(mat[matx][maty]=='X')
+        int mati=i+iorizontal[k],matj=j+jvertical[k];
+        char celulacurenta=mat[mati][matj];
+        if(mati>=0 && mati<linii && matj>=0 && matj<coloane && celulacurenta=='X')
                 nrX++;
+    }
+    return nrX;
+}
+
+int inViata(int i, int j, nodlista* head)   ///verifica daca o celula e inviata cu ajutorul unei liste
+{
+    while(head!=NULL)
+    {
+        if(head->l==i && head->c==j)
+            return 1;
+        head=head->next;
+    }
+    
+    return 0;
+}
+
+int neighboursCuListe(int i, int j, int linii, int coloane, nodlista *head)         ///varianta fara matrice
+{
+    int nrX=0;
+    const int iorizontal[]={-1, -1, -1, 0, 0, 1, 1, 1}, 
+                jvertical[]={-1, 0, 1, -1, 1, -1, 0, 1};  ///offseturi
+    for (int k=0;k<8;k++)
+    {
+        int mati=i+iorizontal[k],matj=j+jvertical[k];
+        if(mati>=0 && mati<linii && matj>=0 && matj<coloane)
+        {
+            int inviata=inViata(mati,matj,head);
+
+            if(inviata)
+                nrX++;
+        }
     }
     return nrX;
 }
@@ -90,7 +120,7 @@ void addAtBeginning(nodlista** head, int linie, int coloana) {
 void addAtEnd(nodlista** head, int linie, int coloana) {
     
     if (*head == NULL) 
-        addAtBeginning(&*head, linie, coloana);
+        addAtBeginning(head, linie, coloana);
     else {
         nodlista *aux = *head;
         nodlista *newNode = (nodlista*)malloc(sizeof(nodlista));   ///am schimbat aici fctia fata de cum era 
@@ -139,16 +169,39 @@ void deleteList (nodlista **head ) {
     *head = NULL ;
 }
 
-void task2(int n, int m, int k, char matrice[][DIMMAX], nodstack** top)       ///aceeasi procedura ca la task 1 dar ...
+void task2(int n, int m, int k, char matrice[][DIMMAX], nodstack** top,char bonus)       
 {
     *top=NULL;                      ///stiva
+    nodlista *gencurenta=NULL;
+    for(int i=0;i<n;i++)
+        for(int j=0;j<m;j++)
+            if(matrice[i][j]=='X')
+                addAtEnd(&gencurenta,i,j);          ///lista cu celule vii initiale
     for(int gen=1;gen<=k;gen++)
     {
-        nodlista* head=NULL;        ///lista pentru fiecare generatie
-        standard(&head,n,m,matrice);
-        
-        push(top, head);                ///stocam lista in stiva
+        nodlista* genurm=generatiaUrmatoareStd(n,m,gencurenta);     ///lista cu celulele vii din generatia urmatoare
+        nodlista* diferente=difGen(n,m,gencurenta,genurm);          ///lista cu modificarile de la o generatie la alta
+
+        push(top, diferente);                ///stocam lista in stiva
+
+        deleteList(&gencurenta);            ///eliberam
+        gencurenta=genurm;              ///pentru urmatoarea iteratie
     }
+
+    if(bonus=='d')
+    {
+        for(int i=0;i<n;i++)
+            for(int j=0;j<m;j++)    
+                matrice[i][j]='+';          ///matrice goala fara celule vii
+
+        nodlista *aux=gencurenta;       ///construim ultima matrice
+        while(aux!=NULL)
+        {
+            matrice[aux->l][aux->c]='X';        
+            aux=aux->next;
+        }
+    }
+    deleteList(&gencurenta);
 }
 
 void printStivaDeJosInSus(nodstack* top, FILE *output, int *gen)
@@ -170,6 +223,7 @@ nodlista* pop(nodstack** top) {         ///modificata pentru a returna o lista
     nodstack *temp = (*top);
     nodlista* aux = temp->lista;
     *top = (*top)->next;
+
     free(temp);
 
     return aux;
@@ -177,7 +231,7 @@ nodlista* pop(nodstack** top) {         ///modificata pentru a returna o lista
 
 void task2bonus(nodstack** top, char matrice[][DIMMAX], int n, int m, int k, FILE* output)
 {
-    while(k>0)
+    while(k>0 && *top!=NULL)
     {
         nodlista* listagen=pop(top);        ///aici punem lista fiecarei generatie
         
@@ -200,70 +254,63 @@ void task2bonus(nodstack** top, char matrice[][DIMMAX], int n, int m, int k, FIL
     }
 }
 
-void regulaB(nodlista **head, int n, int m,char matrice[][DIMMAX])
-{
-    char newGoF[DIMMAX][DIMMAX];
-    for(int i=0;i<n;i++)
-        for(int j=0;j<m;j++)
-            {
-                int vecini = neighbours(matrice, i,j,n,m);
-                if(matrice[i][j]=='+')
-                {
-                    if(vecini==2)           ///doar o singura regula acum
-                    {
-                        newGoF[i][j]='X';
-                        addAtEnd(head,i,j);
-                    }
-                    else
-                        newGoF[i][j]='+';
-                }
-                else 
-                    newGoF[i][j]='X';                    
-            }
+/*1. Orice celulă vie cu mai putin de doi vecini în viat,ă moare (subpopulare).
+2. Orice celulă vie cu doi sau trei vecini vii trăies,te în continuare.
+3. Orice celulă vie cu mai mult de trei vecini vii moare (suprapopulare).
+4. Orice celulă moartă cu exact trei vecini devine o celulă vie (reproducere)
+*/
 
+nodlista* generatiaUrmatoareStd(int n, int m, nodlista* celulevii)            ///returneaza lista cu celulele vii din generatia urmatoare dupa 
+{                                                                                ///regulile de mai sus
+    nodlista* celuleviiurmatoare=NULL;
     for(int i=0;i<n;i++)
-        for(int j=0;j<m;j++)
-            matrice[i][j]=newGoF[i][j];
-}
-
-void standard(nodlista **head, int n, int m, char matrice[][DIMMAX])
-{
-    char newGoF[DIMMAX][DIMMAX];        
-
-    for(int i=0;i<n;i++)
-    {
         for(int j=0;j<m;j++)
         {
-            int vecini=neighbours(matrice, i,j, n,m);
-
-            if(matrice[i][j]=='X')
+            int vecini=neighboursCuListe(i,j, n, m,celulevii), inviata=inViata(i,j,celulevii);
+            
+            if(inviata)
             {
-                if(vecini<2 || vecini>3)
-                {
-                    newGoF[i][j]='+';           ///aici construim si matricea si adaugam in lista coordonatele i si j
-                    addAtEnd(head, i, j);      
-                }
-                else
-                    newGoF[i][j]='X';
-            }    
-            else
-            {
-                if(vecini==3)
-                {
-                    addAtEnd(head,i,j);
-                    newGoF[i][j]='X';
-                }
-                else
-                    newGoF[i][j]='+';
+                if(vecini==2 || vecini==3)
+                    addAtEnd(&celuleviiurmatoare,i,j);
             }
+            else
+                if(vecini==3)
+                    addAtEnd(&celuleviiurmatoare,i,j);
         }
-    }
-
-    for(int i=0;i<n;i++)  
-        for(int j=0;j<m;j++)
-            matrice[i][j]=newGoF[i][j];
+    return celuleviiurmatoare;
 }
 
+nodlista* difGen(int n, int m, nodlista* celulevii, nodlista* celuleviiurmatoare)       ///lista cu celulele care isi modifica starea
+{
+    nodlista* diferente=NULL;
+
+    for(int i=0;i<n;i++)
+        for(int j=0;j<m;j++)
+        {
+            int inviata=inViata(i,j,celulevii), inviataurmatoare=inViata(i,j,celuleviiurmatoare);
+
+            if(inviata!=inviataurmatoare)
+                addAtEnd(&diferente,i,j);
+        }
+    return diferente;
+}
+/// Regula B : Orice celula moarta cu 2 vecinie invie
+nodlista* generatiaUrmatoareRegulaB(int n, int m, nodlista *celulevii)          ///lista cu celulele vii din generatia urmatoare
+{                                                                                   ///dupa regula B
+    nodlista* celuleviiurmatoare=NULL;
+    for(int i=0;i<n;i++)
+        for(int j=0;j<m;j++)
+        {
+            int vecini=neighboursCuListe(i,j, n, m,celulevii), inviata=inViata(i,j,celulevii);
+            
+            if(inviata)
+                addAtEnd(&celuleviiurmatoare,i,j);
+            else
+                if(vecini==2)
+                    addAtEnd(&celuleviiurmatoare,i,j);
+        }
+    return celuleviiurmatoare;
+}
 
 nodarbore* copacinit(int n, int m,const char matrice[][DIMMAX])   ///functia asta initializeaza radacina arborelui cu lista de celule vii
 {
@@ -281,33 +328,43 @@ nodarbore* copacinit(int n, int m,const char matrice[][DIMMAX])   ///functia ast
 
 }
 
-void task3(nodarbore **root,int n, int m, int k, char matrice[][DIMMAX])
+void creazaNodStg(nodarbore* root,nodlista* head)           ///creeaza copilul stang
 {
-    if(k<=0) return;   ///caz pentru a opri recursia
+    root->left=(nodarbore*)malloc(sizeof(nodarbore));    
+    root->left->left=root->left->right=NULL;
+    root->left->lista=head;
+}
 
-    char matriceB[DIMMAX][DIMMAX];      ///matrice pentru nodul stang (regula B)
-    for(int i=0;i<n;i++)
-        for(int j=0;j<m;j++)
-            matriceB[i][j]=matrice[i][j];
+void creazaNodDr(nodarbore* root,nodlista* head)        ///creeaza copilul drept
+{
+    root->right=(nodarbore*)malloc(sizeof(nodarbore));    
+    root->right->left=root->right->right=NULL;
+    root->right->lista=head;
+}
+
+void task3(nodarbore **root,int n, int m, int k,const char matrice[][DIMMAX],nodlista* gencurenta)
+{
+    if(k<=0) return;   ///caz pentru a opri recursivitatea
 
     if(*root==NULL)
-        *root=copacinit(n,m, matrice);   ///initializam arborele
+    {
+        *root=copacinit(n,m, matrice);          ///initializam arborele
+        gencurenta=(*root)->lista;          ///generatie cu celulele vii initiale
+    }
+    nodlista *genurm=generatiaUrmatoareStd(n,m,gencurenta);             ///celulele vii din generatia urm dupa standard
+    nodlista *genurmB=generatiaUrmatoareRegulaB(n,m,gencurenta);            ///dupa regula B
+    nodlista *diferente=difGen(n,m,gencurenta,genurm);              ///modificarile dupa standard
+    nodlista *diferenteB=difGen(n,m,gencurenta,genurmB);            ///dupa regula B
 
-    nodlista *head1=NULL,*head2=NULL;      ///construim listele dupa cele 2 reguli
-    regulaB(&head1, n, m, matriceB);
-    standard(&head2, n,m ,matrice);
-
-    (*root)->left=(nodarbore*)malloc(sizeof(nodarbore));    ///dupa care le punem in nodurile corespunzatoare
-    (*root)->left->left=(*root)->left->right=NULL;
-    (*root)->left->lista=head1;
-
-    (*root)->right=(nodarbore*)malloc(sizeof(nodarbore));
-    (*root)->right->left=(*root)->right->right=NULL;
-    (*root)->right->lista=head2;
+    creazaNodStg(*root,diferenteB);             ///cream fiii
+    creazaNodDr(*root,diferente);
 
     k--;                                            ///scadem o generatie
-    task3(&(*root)->left, n, m, k, matriceB);       ///apelam recursiv functia pentru fii
-    task3(&(*root)->right, n, m, k, matrice);
+    task3(&((*root)->left), n, m, k, matrice,genurmB);       ///apelam recursiv functia pentru fii
+    task3(&((*root)->right), n, m, k, matrice,genurm);
+
+    deleteList(&genurm);            ///free dupa ce se termina recursivitatea
+    deleteList(&genurmB);
 }
 
 void preorder(nodarbore *root,int n, int m,FILE *output, char matriceCurenta[][DIMMAX])     ///parcurgere in preordine
@@ -339,6 +396,7 @@ void preorder(nodarbore *root,int n, int m,FILE *output, char matriceCurenta[][D
 
         preorder(root->left, n, m, output,matricecopie);            ///apelam recursiv pentru fii
         preorder(root->right, n, m, output,matricecopie);
+
     }
 }
 
