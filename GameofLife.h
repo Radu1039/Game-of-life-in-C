@@ -3,7 +3,7 @@
 #include <string.h>
 #include <limits.h>
 
-#define DIMMAX 101   ///dimensiune maxima pentru matrice
+#define DIMMAX 201   ///dimensiune maxima pentru matrice
 
 struct ElemLista {
     int l, c;            ///nod lista care contine linia si coloana
@@ -26,6 +26,11 @@ struct ElemArbore {
 };
 
 typedef struct ElemArbore nodarbore;
+
+typedef struct {
+    int V, E;
+    int **a;
+} Graph;
 
 void verifis(const FILE *f);
 
@@ -74,3 +79,26 @@ void freeArbore(nodarbore **root);
 nodlista* generatiaUrmatoareRegulaB(int n, int m, nodlista *celulevii);
 
 void printStivaDeJosInSus(nodstack* top,FILE* output, int *gen);
+
+void task4(nodarbore* root, int n, int m, int k, int nivelcurent, char matriceCurenta[][DIMMAX], FILE *output);
+
+void construiesteMatriceAdia(const char mat[][DIMMAX], int i, int j, int linii, int coloane, 
+                           int **matriceAdiacenta, int *nrmuchii, int numerotare[DIMMAX][DIMMAX]);
+
+Graph* construiesteGraf(int n, int m, char matrice[][DIMMAX], int coordinitiale[][2]);
+
+void DFS_scan(Graph *g, int visited[], int i,int conexa[], int* conexedim);
+
+void DFS(Graph *g,int conexe[][DIMMAX], int conexedim[], int *comp_conexe);
+
+int existaNod(Graph *g, int curent, int urm, int cale[], int lungcale);
+
+void backtrackLant(Graph* g, int conexa[], int conexedim, int curent, int cale[], int lungcale, int vizitat[], int* lungmax, int caleok[]);
+
+void swap(int *a,int *b);
+
+void sortareDupaCriterii(int conexa[], int conexedim, int coord[][2]);
+
+int celMaiLungLantHamil(Graph *g, int coord[][2], int calebuna[]);
+
+void freeGraf(Graph* g);

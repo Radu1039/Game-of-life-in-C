@@ -16,7 +16,7 @@ int main(int argc, const char* argv[])
         verifis(input_file);
         verifis(output_file);
 
-        char GoF[101][101];
+        char GoF[DIMMAX][DIMMAX];
         int T,N,M,K;
         
         fscanf(input_file,"%d",&T);     ///citire numar task
@@ -59,6 +59,17 @@ int main(int argc, const char* argv[])
             task3(&copac,N,M,K, GoF,NULL);
             preorder(copac,N ,M,output_file ,matriceInit);  ///afisare
             freeArbore(&copac);   ///eliberare memorie
+        }
+        if(T==4)
+        {
+            nodarbore *copac=NULL;
+            char matriceInit[DIMMAX][DIMMAX];  ///matrice numai cu '+'
+            for(int i=0;i<N;i++)
+                for(int j=0;j<M;j++)
+                    matriceInit[i][j]='+';
+            task3(&copac,N,M,K, GoF,NULL);          ///construim arborele
+            task4(copac,N,M,K,0,matriceInit,output_file);
+            freeArbore(&copac);
         }
         fclose(input_file);
         fclose(output_file);
